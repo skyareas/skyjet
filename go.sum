@@ -1,0 +1,4 @@
+github.com/akaahmedkamal/go-args v0.3.0 h1:l6CBZMzW7Blt6gXJVQE2x24lAgypBYVIwN2g1+2/BoI=
+github.com/akaahmedkamal/go-args v0.3.0/go.mod h1:2Oyz9xNh7QdcukG1PAYiF4P8jtjEr7SSyDRGq7DF5Mg=
+github.com/akaahmedkamal/go-cli v0.4.0 h1:0b1CAIuW0Nk8Pyf9kHmBxgafASat5hpLECqPRxUT0sc=
+github.com/akaahmedkamal/go-cli v0.4.0/go.mod h1:RLgG9UTX9st6a3DJM6b1zlgu7BmNNwYX3gGDIArg+i0=
