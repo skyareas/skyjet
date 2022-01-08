@@ -1,12 +1,25 @@
 package config
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/akaahmedkamal/go-cli/v1"
 )
 
-const DefaultHttpPort = "5000"
-const DefaultDbDriver = "sqite3"
-const DefaultDbUrl = "db.sql"
+// Http Defaults
+const (
+	DefaultHttpPort         = 5000
+	DefaultHttpReadTimeout  = 5 * time.Second
+	DefaultHttpWriteTimeout = 10 * time.Second
+	DefaultHttpIdleTimeout  = 15 * time.Second
+)
+
+// Db Defaults
+const (
+	DefaultDbDriver = "sqlite3"
+	DefaultDbUrl    = "db.sql"
+)
 
 type Config struct {
 	app *cli.App
@@ -14,6 +27,14 @@ type Config struct {
 
 func New(app *cli.App) *Config {
 	return &Config{app}
+}
+
+func Of(app *cli.App) *Config {
+	cfg, ok := app.Get("cfg").(*Config)
+	if !ok || cfg == nil {
+		panic("unable to find module \"cfg\"")
+	}
+	return cfg
 }
 
 func (c *Config) DbDriver() string {
@@ -33,14 +54,46 @@ func (c *Config) DbUrl() string {
 }
 
 func (c *Config) HttpHost() string {
-	host, _ := c.app.Args().GetString("-h", "--host")
+	host, _ := c.app.Args().GetString("--http-host")
 	return host
 }
 
-func (c *Config) HttpPort() string {
-	port, _ := c.app.Args().GetString("-p", "--port")
+func (c *Config) HttpPort() int {
+	port, _ := c.app.Args().GetString("--http-port")
 	if port == "" {
-		port = DefaultHttpPort
+		return DefaultHttpPort
 	}
-	return port
+	return c.MustConvToInt(port)
+}
+
+func (c *Config) HttpReadTimeout() time.Duration {
+	t, _ := c.app.Args().GetString("--http-read-time")
+	if t == "" {
+		return DefaultHttpReadTimeout
+	}
+	return time.Duration(c.MustConvToInt(t)) * time.Second
+}
+
+func (c *Config) HttpWriteTimeout() time.Duration {
+	t, _ := c.app.Args().GetString("--http-write-time")
+	if t == "" {
+		return DefaultHttpWriteTimeout
+	}
+	return time.Duration(c.MustConvToInt(t)) * time.Second
+}
+
+func (c *Config) HttpIdleTimeout() time.Duration {
+	t, _ := c.app.Args().GetString("--http-idle-time")
+	if t == "" {
+		return DefaultHttpIdleTimeout
+	}
+	return time.Duration(c.MustConvToInt(t)) * time.Second
+}
+
+func (c *Config) MustConvToInt(str string) int {
+	i, err := strconv.Atoi(str)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }

@@ -1,6 +1,8 @@
 package db
 
 import (
+	"log"
+
 	"github.com/akaahmedkamal/go-cli/v1"
 )
 
@@ -14,5 +16,6 @@ func (i *Init) Desc() string {
 	return "initialize database"
 }
 
-func (i *Init) Run(app *cli.App) {
+func (i *Init) Run(_ *cli.App) {
+	log.Fatal("not implemented!")
 }

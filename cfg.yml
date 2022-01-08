@@ -1,0 +1,10 @@
+Http:
+  Host: localhost
+  Port: 5000
+  ReadTimeout: 5
+  WriteTimeout: 10
+  IdleTimeout: 15
+
+DB:
+  Driver: sqlite3
+  Url: db.sql
