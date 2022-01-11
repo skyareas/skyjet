@@ -4,7 +4,8 @@ Http:
   ReadTimeout: 5
   WriteTimeout: 10
   IdleTimeout: 15
+  ViewsPath: views
 
 DB:
   Driver: sqlite3
-  Url: db.sql
+  Url: bin/db.sql

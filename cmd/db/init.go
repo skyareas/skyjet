@@ -1,21 +1,21 @@
 package db
 
-import (
-	"log"
+import "github.com/akaahmedkamal/go-cli/v1"
 
-	"github.com/akaahmedkamal/go-cli/v1"
-)
-
+// Init command to initialize the database.
 type Init struct{}
 
+// Name returns the command name.
 func (i *Init) Name() string {
 	return "db/init"
 }
 
+// Desc returns the command description.
 func (i *Init) Desc() string {
 	return "initialize database"
 }
 
-func (i *Init) Run(_ *cli.App) {
-	log.Fatal("not implemented!")
+// Run executes the command's logic.
+func (i *Init) Run(app *cli.App) {
+	app.Log().Error().Fatal("not implemented!")
 }

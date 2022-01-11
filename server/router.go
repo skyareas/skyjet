@@ -1,60 +1,120 @@
 package server
 
 import (
+	"github.com/akaahmedkamal/go-server/app"
 	"net/http"
-
-	"github.com/akaahmedkamal/go-cli/v1"
 )
 
 type Router struct {
-	app    *cli.App
-	routes map[string]Route
+	config *RouterConfig
+	routes []*RouteEntry
 }
 
-func NewRouter(app *cli.App) *Router {
-	return &Router{app: app, routes: make(map[string]Route)}
+type PathMatchingStrategy int
+
+const (
+	PathMatchingStrategyExact  PathMatchingStrategy = 0
+	PathMatchingStrategyPrefix PathMatchingStrategy = 1
+)
+
+type RouterConfig struct {
+	PathMatchingStrategy PathMatchingStrategy
+}
+
+func NewRouter(cfg *RouterConfig) *Router {
+	return &Router{config: cfg, routes: make([]*RouteEntry, 0)}
+}
+
+func (r *Router) appendOrdered(pattern, method string, route Route) {
+	if pattern == "" {
+		app.Shared().Log().Fatalln("server: invalid pattern")
+	}
+	if route == nil {
+		app.Shared().Log().Fatalln("server: nil route")
+	}
+	if r.hasEntry(pattern) {
+		app.Shared().Log().Fatalf("server: multiple registrations for \"%s\"\n", pattern)
+	}
+
+	i := r.searchEntry(func(idx int) bool {
+		return len(pattern) > len(r.routes[idx].pattern)
+	})
+
+	r.routes = append(r.routes, nil)
+	copy(r.routes[i+1:], r.routes[i:])
+	r.routes[i] = &RouteEntry{
+		pattern: pattern,
+		method:  method,
+		route:   route,
+	}
+}
+
+func (r *Router) searchEntry(f func(i int) bool) int {
+	i, j := 0, len(r.routes)
+	for i < j {
+		h := int(uint(i+j) >> 1)
+		if !f(h) {
+			i = h + 1
+		} else {
+			j = h
+		}
+	}
+	return i
+}
+
+func (r *Router) hasEntry(pattern string) bool {
+	for _, entry := range r.routes {
+		if entry.pattern == pattern {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *Router) Get(pattern string, route Route) {
-	r.routes[pattern] = route
+	r.appendOrdered(pattern, http.MethodGet, route)
 }
 
 func (r *Router) Post(pattern string, route Route) {
-	r.routes[pattern] = route
+	r.appendOrdered(pattern, http.MethodPost, route)
 }
 
 func (r *Router) Put(pattern string, route Route) {
-	r.routes[pattern] = route
+	r.appendOrdered(pattern, http.MethodPut, route)
 }
 
 func (r *Router) Delete(pattern string, route Route) {
-	r.routes[pattern] = route
+	r.appendOrdered(pattern, http.MethodDelete, route)
 }
 
 func (r *Router) All(pattern string, route Route) {
-	r.routes[pattern] = route
+	r.appendOrdered(pattern, "*", route)
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var err error
 
-	route := r.routes[req.URL.Path]
+	var found bool
+	for _, entry := range r.routes {
+		match, params := entry.Match(req, r.config.PathMatchingStrategy)
+		if match {
+			found = true
 
-	if route == nil {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte("404 page not found"))
-		return
+			_req := NewHttpRequest(req, params)
+			_res := NewHttpResponse(req, w)
+			if err = entry.route.HandleRequest(_req, _res); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(err.Error()))
+			}
+
+			if _res.Sent() {
+				break
+			}
+		}
 	}
 
-	_req := new(HttpRequest)
-	_req.App = r.app
-	_req.Request = req
-
-	_res := new(HttpResponse)
-	_res.w = w
-
-	if err = route.HandleRequest(_req, _res); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(err.Error()))
+	if !found {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("404 page not found"))
 	}
 }

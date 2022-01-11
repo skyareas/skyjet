@@ -5,46 +5,59 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/akaahmedkamal/go-cli/v1"
+	"github.com/akaahmedkamal/go-server/app"
 	"github.com/akaahmedkamal/go-server/config"
 )
 
+// HttpServer struct represents the
+// Http server implementation.
 type HttpServer struct {
-	app    *cli.App
 	srv    *http.Server
 	router *Router
 }
 
-func NewHttpServer(app *cli.App) *HttpServer {
-	cfg := config.Of(app)
-
+// NewHttpServer initializes a new HttpServer and return it.
+// optionally, pass a pointer to the Router instance to be
+// used; if not passed a default router will be used.
+func NewHttpServer(router ...*Router) *HttpServer {
 	srv := new(HttpServer)
 
-	srv.app = app
-	srv.srv = new(http.Server)
-	srv.router = NewRouter(app)
+	if len(router) > 0 {
+		srv.router = router[0]
+	} else {
+		srv.router = NewRouter(&RouterConfig{
+			PathMatchingStrategy: PathMatchingStrategyExact,
+		})
+	}
 
-	srv.srv.Addr = fmt.Sprintf("%s:%d", cfg.HttpHost(), cfg.HttpPort())
-	srv.srv.Handler = srv.router
-	srv.srv.ReadTimeout = cfg.HttpReadTimeout()
-	srv.srv.WriteTimeout = cfg.HttpWriteTimeout()
-	srv.srv.IdleTimeout = cfg.HttpIdleTimeout()
+	cfg := config.Shared()
+	srv.srv = &http.Server{
+		Addr:         fmt.Sprintf("%s:%d", cfg.Http.Host, cfg.Http.Port),
+		Handler:      srv.router,
+		ReadTimeout:  cfg.Http.ReadTimeout,
+		WriteTimeout: cfg.Http.WriteTimeout,
+		IdleTimeout:  cfg.Http.IdleTimeout,
+	}
 
 	return srv
 }
 
+// Router returns a pointer to the Http Router.
 func (s *HttpServer) Router() *Router {
 	return s.router
 }
 
-func (s *HttpServer) ListenAndServe() error {
+// ListenAndServe start listening at the address specified,
+// and handles incoming requests.
+func (s *HttpServer) ListenAndServe() {
 	err := s.srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		return err
+		app.Shared().Log().Fatalf("[HTTP]: %s\n", err.Error())
 	}
-	return nil
 }
 
+// Shutdown stop listening to new incoming requests,
+// and finalize all live requests if any.
 func (s *HttpServer) Shutdown(ctx context.Context) error {
 	s.srv.SetKeepAlivesEnabled(false)
 	return s.srv.Shutdown(ctx)
