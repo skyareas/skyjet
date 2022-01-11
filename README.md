@@ -9,3 +9,4 @@ Golang Server Template
 - [ ] Implement `HttpResponse.Jsonp()`.
 - [ ] Implement `HttpResponse.Download()`.
 - [ ] Add tests.
+- [ ] Add header management functions to the `HttpResponse`.
