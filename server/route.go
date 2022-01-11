@@ -51,6 +51,10 @@ func (r *RouteEntry) matchWithParams(path string) (bool, map[string][]string) {
 	pathParts := strings.Split(path, "/")
 	params := make(map[string][]string)
 
+	if len(patternParts) != len(pathParts) {
+		return false, params
+	}
+
 	for i, part := range patternParts {
 		if strings.HasPrefix(part, ":") {
 			params[part[1:]] = append(params[part[1:]], pathParts[i])
