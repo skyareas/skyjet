@@ -92,7 +92,12 @@ func (r *Router) All(pattern string, route Route) {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	var err error
+	defer func() {
+		if rec := recover(); rec != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			r.writeError(w, rec.(error).Error())
+		}
+	}()
 
 	var found bool
 	for _, entry := range r.routes {
@@ -102,9 +107,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 			_req := NewHttpRequest(req, params)
 			_res := NewHttpResponse(req, w)
-			if err = entry.route.HandleRequest(_req, _res); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				_, _ = w.Write([]byte(err.Error()))
+			if err := entry.route.HandleRequest(_req, _res); err != nil {
+				panic(err)
 			}
 
 			if _res.Sent() {
@@ -115,6 +119,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte("404 page not found"))
+		r.writeError(w, "404 page not found")
+	}
+}
+
+func (r *Router) writeError(w http.ResponseWriter, errMsg string) {
+	if _, err := w.Write([]byte(errMsg)); err != nil {
+		panic(err)
 	}
 }
