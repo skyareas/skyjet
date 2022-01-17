@@ -41,6 +41,7 @@ func (r *HttpResponse) Json(v interface{}, statusCode ...int) error {
 	if err != nil {
 		return err
 	}
+	r.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if _, err = r.w.Write(b); err != nil {
 		return err
 	}
