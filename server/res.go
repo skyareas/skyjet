@@ -41,12 +41,12 @@ func (r *HttpResponse) Json(v interface{}, statusCode ...int) error {
 	if err != nil {
 		return err
 	}
+	if len(statusCode) > 0 {
+		r.Status(statusCode[0])
+	}
 	r.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if _, err = r.w.Write(b); err != nil {
 		return err
-	}
-	if len(statusCode) > 0 {
-		r.Status(statusCode[0])
 	}
 	return err
 }
@@ -91,10 +91,10 @@ func (r *HttpResponse) Render(temp string, data ...interface{}) error {
 // Send sends a response of raw bytes value,
 // optionally specifying the status code.
 func (r *HttpResponse) Send(v []byte, statusCode ...int) error {
-	_, err := r.w.Write(v)
 	if len(statusCode) > 0 {
 		r.Status(statusCode[0])
 	}
+	_, err := r.w.Write(v)
 	return err
 }
 
