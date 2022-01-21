@@ -95,8 +95,11 @@ func (r *Router) Use(pattern string, routes ...Route) {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	var recovered bool
+
 	defer func() {
 		if rec := recover(); rec != nil {
+			recovered = true
 			w.WriteHeader(http.StatusInternalServerError)
 			r.writeError(w, rec.(error).Error())
 		}
@@ -120,7 +123,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	if !found {
+	if !found && !recovered {
 		w.WriteHeader(http.StatusNotFound)
 		r.writeError(w, "404 page not found")
 	}
