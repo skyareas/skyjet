@@ -8,4 +8,4 @@ Http:
 
 DB:
   Driver: sqlite3
-  Url: bin/db.sql
+  Url: build/db.sql
