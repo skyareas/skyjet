@@ -32,9 +32,6 @@ func (r *Router) appendOrdered(pattern, method string, route Route) {
 	if route == nil {
 		app.Shared().Log().Fatalln("server: nil route")
 	}
-	if r.hasEntry(pattern) {
-		app.Shared().Log().Fatalf("server: multiple registrations for \"%s\"\n", pattern)
-	}
 
 	i := r.searchEntry(func(idx int) bool {
 		return len(pattern) > len(r.routes[idx].pattern)
