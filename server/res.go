@@ -3,23 +3,25 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/akaahmedkamal/go-server/config"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/akaahmedkamal/go-server/config"
 )
 
 // HttpResponse struct represents an Http response.
 type HttpResponse struct {
-	r    *http.Request
-	w    http.ResponseWriter
-	sent bool
+	r      *http.Request
+	w      http.ResponseWriter
+	Header http.Header
+	sent   bool
 }
 
 func NewHttpResponse(req *http.Request, w http.ResponseWriter) *HttpResponse {
-	return &HttpResponse{r: req, w: w, sent: false}
+	return &HttpResponse{r: req, w: w, Header: w.Header(), sent: false}
 }
 
 // Writer returns a pointer to the underlying http.ResponseWriter

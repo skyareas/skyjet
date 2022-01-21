@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/akaahmedkamal/go-server/app"
 	"net/http"
+
+	"github.com/akaahmedkamal/go-server/app"
 )
 
 type Router struct {
@@ -39,48 +40,48 @@ func (ref *Router) append(pattern, method string, route Route) {
 	})
 }
 
-func (ref *Router) appendOrdered(pattern, method string, route Route) {
-	if pattern == "" {
-		app.Shared().Log().Fatalln("server: invalid pattern")
-	}
-	if route == nil {
-		app.Shared().Log().Fatalln("server: nil route")
-	}
+// func (ref *Router) appendOrdered(pattern, method string, route Route) {
+// 	if pattern == "" {
+// 		app.Shared().Log().Fatalln("server: invalid pattern")
+// 	}
+// 	if route == nil {
+// 		app.Shared().Log().Fatalln("server: nil route")
+// 	}
 
-	i := ref.searchEntry(func(idx int) bool {
-		return len(pattern) > len(ref.routes[idx].pattern)
-	})
+// 	i := ref.searchEntry(func(idx int) bool {
+// 		return len(pattern) > len(ref.routes[idx].pattern)
+// 	})
 
-	ref.routes = append(ref.routes, nil)
-	copy(ref.routes[i+1:], ref.routes[i:])
-	ref.routes[i] = &RouteEntry{
-		pattern: pattern,
-		method:  method,
-		route:   route,
-	}
-}
+// 	ref.routes = append(ref.routes, nil)
+// 	copy(ref.routes[i+1:], ref.routes[i:])
+// 	ref.routes[i] = &RouteEntry{
+// 		pattern: pattern,
+// 		method:  method,
+// 		route:   route,
+// 	}
+// }
 
-func (ref *Router) searchEntry(f func(i int) bool) int {
-	i, j := 0, len(ref.routes)
-	for i < j {
-		h := int(uint(i+j) >> 1)
-		if !f(h) {
-			i = h + 1
-		} else {
-			j = h
-		}
-	}
-	return i
-}
+// func (ref *Router) searchEntry(f func(i int) bool) int {
+// 	i, j := 0, len(ref.routes)
+// 	for i < j {
+// 		h := int(uint(i+j) >> 1)
+// 		if !f(h) {
+// 			i = h + 1
+// 		} else {
+// 			j = h
+// 		}
+// 	}
+// 	return i
+// }
 
-func (ref *Router) hasEntry(pattern string) bool {
-	for _, entry := range ref.routes {
-		if entry.pattern == pattern {
-			return true
-		}
-	}
-	return false
-}
+// func (ref *Router) hasEntry(pattern string) bool {
+// 	for _, entry := range ref.routes {
+// 		if entry.pattern == pattern {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func (ref *Router) Get(pattern string, route Route) {
 	ref.append(pattern, http.MethodGet, route)

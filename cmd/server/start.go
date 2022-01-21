@@ -12,6 +12,7 @@ import (
 	"github.com/akaahmedkamal/go-server/config"
 	"github.com/akaahmedkamal/go-server/db"
 	"github.com/akaahmedkamal/go-server/server"
+	"github.com/akaahmedkamal/go-server/server/middleware"
 	"github.com/akaahmedkamal/go-server/server/routes/auth"
 	"github.com/akaahmedkamal/go-server/server/routes/home"
 	"github.com/akaahmedkamal/go-server/server/routes/users"
@@ -82,6 +83,13 @@ func setupHttpServer() *server.HttpServer {
 
 	// get ref to the router
 	r := srv.Router()
+
+	// register middleware
+	r.Use("*", &middleware.Cors{
+		Origin:  []string{"*"},
+		Methods: []string{"*"},
+		Headers: []string{"*"},
+	})
 
 	// register home routes
 	r.Get("/", &home.Index{})
