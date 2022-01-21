@@ -1,6 +1,11 @@
 package config
 
-import "github.com/akaahmedkamal/go-server/app"
+import (
+	"errors"
+	"os"
+
+	"github.com/akaahmedkamal/go-server/app"
+)
 
 // shared instance of the app config.
 var shared *Config
@@ -13,7 +18,7 @@ func Shared() *Config {
 		shared = new(Config)
 
 		file, err := readConfigFile()
-		if err != nil {
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			app.Shared().Log().Fatalf("failed to read config file: %s", err.Error())
 		}
 
