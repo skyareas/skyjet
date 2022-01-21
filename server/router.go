@@ -88,6 +88,12 @@ func (r *Router) All(pattern string, route Route) {
 	r.appendOrdered(pattern, "*", route)
 }
 
+func (r *Router) Use(pattern string, routes ...Route) {
+	for _, route := range routes {
+		r.appendOrdered(pattern, "*", route)
+	}
+}
+
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if rec := recover(); rec != nil {
