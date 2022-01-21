@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/akaahmedkamal/go-server/server/routes"
 	"os"
 	"os/signal"
 	"time"
@@ -90,6 +91,9 @@ func setupHttpServer() *server.HttpServer {
 	r.All("/auth/register", &auth.Register{})
 	r.All("/auth/login", &auth.Login{})
 	r.Post("/auth/logout", &auth.Logout{})
+
+	// register not found route
+	r.All("*", &routes.NotFound{})
 
 	// register user routes
 	r.Get("/users/:id/profile", &users.Profile{})

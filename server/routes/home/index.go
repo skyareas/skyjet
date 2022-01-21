@@ -7,6 +7,6 @@ type Index struct {
 }
 
 // HandleRequest handles the incoming requests.
-func (i *Index) HandleRequest(_ *server.HttpRequest, res *server.HttpResponse) error {
+func (ref *Index) HandleRequest(_ *server.HttpRequest, res *server.HttpResponse) error {
 	return res.Render("index.html")
 }

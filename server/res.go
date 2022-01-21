@@ -23,51 +23,45 @@ func NewHttpResponse(req *http.Request, w http.ResponseWriter) *HttpResponse {
 }
 
 // Writer returns a pointer to the underlying http.ResponseWriter
-func (r *HttpResponse) Writer() http.ResponseWriter {
-	return r.w
+func (ref *HttpResponse) Writer() http.ResponseWriter {
+	return ref.w
 }
 
 // Download prompts a file to be downloaded.
-func (r *HttpResponse) Download() {}
+func (ref *HttpResponse) Download() {}
 
 // End ends the response process.
-func (r *HttpResponse) End() {
-	r.sent = true
+func (ref *HttpResponse) End() {
+	ref.sent = true
 }
 
 // Json sends a JSON response.
-func (r *HttpResponse) Json(v interface{}, statusCode ...int) error {
+func (ref *HttpResponse) Json(v interface{}, statusCode ...int) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}
-	if len(statusCode) > 0 {
-		r.Status(statusCode[0])
-	}
-	r.w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	if _, err = r.w.Write(b); err != nil {
-		return err
-	}
-	return err
+	ref.w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	return ref.Send(b, statusCode...)
 }
 
 // Jsonp sends a JSON response with JSONP support.
-func (r *HttpResponse) Jsonp(d interface{}) error {
+func (ref *HttpResponse) Jsonp(d interface{}) error {
 	return nil
 }
 
 // Redirect redirects a request, optionally specifying the status code.
-func (r *HttpResponse) Redirect(url string, statusCode ...int) {
+func (ref *HttpResponse) Redirect(url string, statusCode ...int) {
 	code := http.StatusMovedPermanently
 	if len(statusCode) > 0 {
 		code = statusCode[0]
 	}
-	http.Redirect(r.w, r.r, url, code)
-	r.End()
+	http.Redirect(ref.w, ref.r, url, code)
+	ref.End()
 }
 
 // Render renders a view template with data.
-func (r *HttpResponse) Render(temp string, data ...interface{}) error {
+func (ref *HttpResponse) Render(temp string, data ...interface{}) error {
 	vp := config.Shared().Http.ViewsPath
 	f, err := os.ReadFile(filepath.Join(vp, temp))
 	if err != nil {
@@ -84,52 +78,51 @@ func (r *HttpResponse) Render(temp string, data ...interface{}) error {
 		d = data[0]
 	}
 
-	r.w.Header().Set("Content-Type", "text/html")
-	return t.Execute(r.w, d)
+	ref.w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(ref.w, d)
+	ref.End()
+
+	return err
 }
 
 // Send sends a response of raw bytes value,
 // optionally specifying the status code.
-func (r *HttpResponse) Send(v []byte, statusCode ...int) error {
+func (ref *HttpResponse) Send(v []byte, statusCode ...int) error {
 	if len(statusCode) > 0 {
-		r.Status(statusCode[0])
+		ref.Status(statusCode[0])
 	}
-	_, err := r.w.Write(v)
+	_, err := ref.w.Write(v)
+	ref.End()
 	return err
 }
 
 // SendFile sends a file as an octet stream,
 // optionally specifying the status code.
-func (r *HttpResponse) SendFile(filename string, statusCode ...int) error {
+func (ref *HttpResponse) SendFile(filename string, statusCode ...int) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
-	code := http.StatusOK
-	if len(statusCode) > 0 {
-		code = statusCode[0]
-	}
-	r.Status(code)
-	r.w.Header().Set("Content-Type", "application/octet-stream")
-	_, err = r.w.Write(b)
-	return err
+	ref.w.Header().Set("Content-Type", "application/octet-stream")
+	return ref.Send(b, statusCode...)
 }
 
 // Status set the response status code.
-func (r *HttpResponse) Status(statusCode int) {
-	r.w.WriteHeader(statusCode)
+func (ref *HttpResponse) Status(statusCode int) {
+	ref.w.WriteHeader(statusCode)
 }
 
 // SendStatus set the response status code and send its
 // string representation as the response body.
-func (r *HttpResponse) SendStatus(statusCode int) error {
-	r.Status(statusCode)
-	_, err := r.w.Write([]byte(http.StatusText(statusCode)))
+func (ref *HttpResponse) SendStatus(statusCode int) error {
+	ref.Status(statusCode)
+	_, err := ref.w.Write([]byte(http.StatusText(statusCode)))
+	ref.End()
 	return err
 }
 
 // Sent returns a bool indicates whether the response
 // has been sent to the client.
-func (r *HttpResponse) Sent() bool {
-	return r.sent
+func (ref *HttpResponse) Sent() bool {
+	return ref.sent
 }

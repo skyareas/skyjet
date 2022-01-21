@@ -25,7 +25,21 @@ func NewRouter(cfg *RouterConfig) *Router {
 	return &Router{config: cfg, routes: make([]*RouteEntry, 0)}
 }
 
-func (r *Router) appendOrdered(pattern, method string, route Route) {
+func (ref *Router) append(pattern, method string, route Route) {
+	if pattern == "" {
+		app.Shared().Log().Fatalln("server: invalid pattern")
+	}
+	if route == nil {
+		app.Shared().Log().Fatalln("server: nil route")
+	}
+	ref.routes = append(ref.routes, &RouteEntry{
+		pattern: pattern,
+		method:  method,
+		route:   route,
+	})
+}
+
+func (ref *Router) appendOrdered(pattern, method string, route Route) {
 	if pattern == "" {
 		app.Shared().Log().Fatalln("server: invalid pattern")
 	}
@@ -33,21 +47,21 @@ func (r *Router) appendOrdered(pattern, method string, route Route) {
 		app.Shared().Log().Fatalln("server: nil route")
 	}
 
-	i := r.searchEntry(func(idx int) bool {
-		return len(pattern) > len(r.routes[idx].pattern)
+	i := ref.searchEntry(func(idx int) bool {
+		return len(pattern) > len(ref.routes[idx].pattern)
 	})
 
-	r.routes = append(r.routes, nil)
-	copy(r.routes[i+1:], r.routes[i:])
-	r.routes[i] = &RouteEntry{
+	ref.routes = append(ref.routes, nil)
+	copy(ref.routes[i+1:], ref.routes[i:])
+	ref.routes[i] = &RouteEntry{
 		pattern: pattern,
 		method:  method,
 		route:   route,
 	}
 }
 
-func (r *Router) searchEntry(f func(i int) bool) int {
-	i, j := 0, len(r.routes)
+func (ref *Router) searchEntry(f func(i int) bool) int {
+	i, j := 0, len(ref.routes)
 	for i < j {
 		h := int(uint(i+j) >> 1)
 		if !f(h) {
@@ -59,8 +73,8 @@ func (r *Router) searchEntry(f func(i int) bool) int {
 	return i
 }
 
-func (r *Router) hasEntry(pattern string) bool {
-	for _, entry := range r.routes {
+func (ref *Router) hasEntry(pattern string) bool {
+	for _, entry := range ref.routes {
 		if entry.pattern == pattern {
 			return true
 		}
@@ -68,46 +82,46 @@ func (r *Router) hasEntry(pattern string) bool {
 	return false
 }
 
-func (r *Router) Get(pattern string, route Route) {
-	r.appendOrdered(pattern, http.MethodGet, route)
+func (ref *Router) Get(pattern string, route Route) {
+	ref.append(pattern, http.MethodGet, route)
 }
 
-func (r *Router) Post(pattern string, route Route) {
-	r.appendOrdered(pattern, http.MethodPost, route)
+func (ref *Router) Post(pattern string, route Route) {
+	ref.append(pattern, http.MethodPost, route)
 }
 
-func (r *Router) Put(pattern string, route Route) {
-	r.appendOrdered(pattern, http.MethodPut, route)
+func (ref *Router) Put(pattern string, route Route) {
+	ref.append(pattern, http.MethodPut, route)
 }
 
-func (r *Router) Delete(pattern string, route Route) {
-	r.appendOrdered(pattern, http.MethodDelete, route)
+func (ref *Router) Delete(pattern string, route Route) {
+	ref.append(pattern, http.MethodDelete, route)
 }
 
-func (r *Router) All(pattern string, route Route) {
-	r.appendOrdered(pattern, "*", route)
+func (ref *Router) All(pattern string, route Route) {
+	ref.append(pattern, "*", route)
 }
 
-func (r *Router) Use(pattern string, routes ...Route) {
+func (ref *Router) Use(pattern string, routes ...Route) {
 	for _, route := range routes {
-		r.appendOrdered(pattern, "*", route)
+		ref.append(pattern, "*", route)
 	}
 }
 
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (ref *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var recovered bool
 
 	defer func() {
 		if rec := recover(); rec != nil {
 			recovered = true
 			w.WriteHeader(http.StatusInternalServerError)
-			r.writeError(w, rec.(error).Error())
+			ref.writeError(w, rec.(error).Error())
 		}
 	}()
 
 	var found bool
-	for _, entry := range r.routes {
-		match, params := entry.Match(req, r.config.PathMatchingStrategy)
+	for _, entry := range ref.routes {
+		match, params := entry.Match(req, ref.config.PathMatchingStrategy)
 		if match {
 			found = true
 
@@ -125,11 +139,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if !found && !recovered {
 		w.WriteHeader(http.StatusNotFound)
-		r.writeError(w, "404 page not found")
+		ref.writeError(w, "404 page not found")
 	}
 }
 
-func (r *Router) writeError(w http.ResponseWriter, errMsg string) {
+func (ref *Router) writeError(w http.ResponseWriter, errMsg string) {
 	if _, err := w.Write([]byte(errMsg)); err != nil {
 		panic(err)
 	}
