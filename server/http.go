@@ -25,9 +25,7 @@ func NewHttpServer(router ...*Router) *HttpServer {
 	if len(router) > 0 {
 		srv.router = router[0]
 	} else {
-		srv.router = NewRouter(&RouterConfig{
-			PathMatchingStrategy: PathMatchingStrategyExact,
-		})
+		srv.router = NewRouter(&RouterConfig{})
 	}
 
 	cfg := config.Shared()

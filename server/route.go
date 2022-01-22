@@ -10,44 +10,45 @@ type Route interface {
 }
 
 type RouteEntry struct {
-	pattern string
-	method  string
-	route   Route
+	pattern              string
+	method               string
+	route                Route
+	pathMatchingStrategy PathMatchingStrategy
 }
 
-func (r *RouteEntry) Match(req *http.Request, strategy PathMatchingStrategy) (bool, map[string][]string) {
+func (ref *RouteEntry) Match(req *http.Request) (bool, map[string][]string) {
 	params := make(map[string][]string)
 
 	// match exactly
-	if r.pattern == req.URL.Path && r.method == req.Method {
+	if ref.pattern == req.URL.Path && ref.method == req.Method {
 		return true, params
 	}
 
 	// match wildcard
-	if (r.pattern == "*" && r.method == "*") ||
-		(r.pattern == req.URL.Path && r.method == "*") ||
-		(r.pattern == "*" && r.method == req.Method) {
+	if (ref.pattern == "*" && ref.method == "*") ||
+		(ref.pattern == req.URL.Path && ref.method == "*") ||
+		(ref.pattern == "*" && ref.method == req.Method) {
 		return true, params
 	}
 
 	// match prefix
-	if strategy == PathMatchingStrategyPrefix &&
-		strings.HasPrefix(req.URL.Path, r.pattern) &&
-		(r.method == "*" || r.method == req.Method) {
+	if ref.pathMatchingStrategy == PathMatchingStrategyPrefix &&
+		strings.HasPrefix(req.URL.Path, ref.pattern) &&
+		(ref.method == "*" || ref.method == req.Method) {
 		return true, params
 	}
 
 	// match with params
-	if strings.ContainsRune(r.pattern, ':') {
-		return r.matchWithParams(req.URL.Path)
+	if strings.ContainsRune(ref.pattern, ':') {
+		return ref.matchWithParams(req.URL.Path)
 	}
 
 	// doesn't match
 	return false, params
 }
 
-func (r *RouteEntry) matchWithParams(path string) (bool, map[string][]string) {
-	patternParts := strings.Split(r.pattern, "/")
+func (ref *RouteEntry) matchWithParams(path string) (bool, map[string][]string) {
+	patternParts := strings.Split(ref.pattern, "/")
 	pathParts := strings.Split(path, "/")
 	params := make(map[string][]string)
 

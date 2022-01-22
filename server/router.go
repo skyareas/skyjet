@@ -19,14 +19,13 @@ const (
 )
 
 type RouterConfig struct {
-	PathMatchingStrategy PathMatchingStrategy
 }
 
 func NewRouter(cfg *RouterConfig) *Router {
 	return &Router{config: cfg, routes: make([]*RouteEntry, 0)}
 }
 
-func (ref *Router) append(pattern, method string, route Route) {
+func (ref *Router) append(pattern, method string, route Route, pathMatchingStrategy PathMatchingStrategy) {
 	if pattern == "" {
 		app.Shared().Log().Fatalln("server: invalid pattern")
 	}
@@ -34,9 +33,10 @@ func (ref *Router) append(pattern, method string, route Route) {
 		app.Shared().Log().Fatalln("server: nil route")
 	}
 	ref.routes = append(ref.routes, &RouteEntry{
-		pattern: pattern,
-		method:  method,
-		route:   route,
+		pattern:              pattern,
+		method:               method,
+		route:                route,
+		pathMatchingStrategy: pathMatchingStrategy,
 	})
 }
 
@@ -84,28 +84,28 @@ func (ref *Router) append(pattern, method string, route Route) {
 // }
 
 func (ref *Router) Get(pattern string, route Route) {
-	ref.append(pattern, http.MethodGet, route)
+	ref.append(pattern, http.MethodGet, route, PathMatchingStrategyExact)
 }
 
 func (ref *Router) Post(pattern string, route Route) {
-	ref.append(pattern, http.MethodPost, route)
+	ref.append(pattern, http.MethodPost, route, PathMatchingStrategyExact)
 }
 
 func (ref *Router) Put(pattern string, route Route) {
-	ref.append(pattern, http.MethodPut, route)
+	ref.append(pattern, http.MethodPut, route, PathMatchingStrategyExact)
 }
 
 func (ref *Router) Delete(pattern string, route Route) {
-	ref.append(pattern, http.MethodDelete, route)
+	ref.append(pattern, http.MethodDelete, route, PathMatchingStrategyExact)
 }
 
 func (ref *Router) All(pattern string, route Route) {
-	ref.append(pattern, "*", route)
+	ref.append(pattern, "*", route, PathMatchingStrategyExact)
 }
 
 func (ref *Router) Use(pattern string, routes ...Route) {
 	for _, route := range routes {
-		ref.append(pattern, "*", route)
+		ref.append(pattern, "*", route, PathMatchingStrategyPrefix)
 	}
 }
 
@@ -122,7 +122,7 @@ func (ref *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	var found bool
 	for _, entry := range ref.routes {
-		match, params := entry.Match(req, ref.config.PathMatchingStrategy)
+		match, params := entry.Match(req)
 		if match {
 			found = true
 

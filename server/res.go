@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -105,7 +106,18 @@ func (ref *HttpResponse) SendFile(filename string, statusCode ...int) error {
 	if err != nil {
 		return err
 	}
-	ref.w.Header().Set("Content-Type", "application/octet-stream")
+
+	m := mime.TypeByExtension(filepath.Ext(filename))
+	if err != nil {
+		return err
+	}
+
+	if m == "" {
+		m = "application/octet-stream"
+	}
+
+	ref.w.Header().Set("Content-Type", m)
+
 	return ref.Send(b, statusCode...)
 }
 
