@@ -1,16 +1,18 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // HttpRequest struct represents an Http request.
 type HttpRequest struct {
 	Request *http.Request
-	Body    interface{}
+	Body    *HttpRequestBody
 	params  map[string][]string
 }
 
 func NewHttpRequest(req *http.Request, params map[string][]string) *HttpRequest {
-	return &HttpRequest{Request: req, params: params}
+	return &HttpRequest{req, &HttpRequestBody{}, params}
 }
 
 // Param returns all values for a specific path parameter.
