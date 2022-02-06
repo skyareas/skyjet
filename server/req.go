@@ -5,7 +5,7 @@ import "net/http"
 // HttpRequest struct represents an Http request.
 type HttpRequest struct {
 	Request *http.Request
-	Body    *interface{}
+	Body    interface{}
 	params  map[string][]string
 }
 

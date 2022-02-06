@@ -40,49 +40,6 @@ func (ref *Router) append(pattern, method string, route Route, pathMatchingStrat
 	})
 }
 
-// func (ref *Router) appendOrdered(pattern, method string, route Route) {
-// 	if pattern == "" {
-// 		app.Shared().Log().Fatalln("server: invalid pattern")
-// 	}
-// 	if route == nil {
-// 		app.Shared().Log().Fatalln("server: nil route")
-// 	}
-
-// 	i := ref.searchEntry(func(idx int) bool {
-// 		return len(pattern) > len(ref.routes[idx].pattern)
-// 	})
-
-// 	ref.routes = append(ref.routes, nil)
-// 	copy(ref.routes[i+1:], ref.routes[i:])
-// 	ref.routes[i] = &RouteEntry{
-// 		pattern: pattern,
-// 		method:  method,
-// 		route:   route,
-// 	}
-// }
-
-// func (ref *Router) searchEntry(f func(i int) bool) int {
-// 	i, j := 0, len(ref.routes)
-// 	for i < j {
-// 		h := int(uint(i+j) >> 1)
-// 		if !f(h) {
-// 			i = h + 1
-// 		} else {
-// 			j = h
-// 		}
-// 	}
-// 	return i
-// }
-
-// func (ref *Router) hasEntry(pattern string) bool {
-// 	for _, entry := range ref.routes {
-// 		if entry.pattern == pattern {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
 func (ref *Router) Get(pattern string, route Route) {
 	ref.append(pattern, http.MethodGet, route, PathMatchingStrategyExact)
 }
@@ -121,13 +78,17 @@ func (ref *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	var found bool
+
+	_req := NewHttpRequest(req, map[string][]string{})
+	_res := NewHttpResponse(req, w)
+
 	for _, entry := range ref.routes {
 		match, params := entry.Match(req)
 		if match {
 			found = true
 
-			_req := NewHttpRequest(req, params)
-			_res := NewHttpResponse(req, w)
+			_req.params = params
+
 			if err := entry.route.HandleRequest(_req, _res); err != nil {
 				panic(err)
 			}
