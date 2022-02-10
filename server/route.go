@@ -40,7 +40,9 @@ func (ref *RouteEntry) Match(req *http.Request) (bool, map[string][]string) {
 
 	// match with params
 	if strings.ContainsRune(ref.pattern, ':') {
-		return ref.matchWithParams(req.URL.Path)
+		if ref.method == "*" || ref.method == req.Method {
+			return ref.matchWithParams(req.URL.Path)
+		}
 	}
 
 	// doesn't match
