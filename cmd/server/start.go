@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"github.com/akaahmedkamal/go-server/server/routes"
 	"os"
 	"os/signal"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/akaahmedkamal/go-server/db"
 	"github.com/akaahmedkamal/go-server/server"
 	"github.com/akaahmedkamal/go-server/server/middleware"
+	"github.com/akaahmedkamal/go-server/server/routes"
 	"github.com/akaahmedkamal/go-server/server/routes/auth"
 	"github.com/akaahmedkamal/go-server/server/routes/home"
 	"github.com/akaahmedkamal/go-server/server/routes/users"
@@ -20,19 +20,19 @@ import (
 
 // Start command to start the Http server.
 type Start struct {
+	Name string `cli:"name"`
+	Help string `cli:"help"`
 	srv  *server.HttpServer
 	stop chan bool
 	quit chan os.Signal
 }
 
-// Name returns the command name.
-func (s *Start) Name() string {
-	return "server/start"
-}
-
-// Desc returns the command description.
-func (s *Start) Desc() string {
-	return "start server"
+// NewStartCmd initialized a new server/start command.
+func NewStartCmd() *Start {
+	return &Start{
+		Name: "server/start",
+		Help: "start Http server",
+	}
 }
 
 // Run executes the command's logic.
@@ -100,11 +100,11 @@ func setupHttpServer() *server.HttpServer {
 	r.All("/auth/login", &auth.Login{})
 	r.Post("/auth/logout", &auth.Logout{})
 
-	// register not found route
-	r.All("*", &routes.NotFound{})
-
 	// register user routes
 	r.Get("/users/:id/profile", &users.Profile{})
+
+	// register not found route
+	r.All("*", &routes.NotFound{})
 
 	return srv
 }

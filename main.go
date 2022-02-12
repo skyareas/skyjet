@@ -12,15 +12,15 @@ func main() {
 	a := app.Shared()
 
 	// register db commands
-	a.Register(&db.Init{})
-	a.Register(&db.Migrate{})
+	a.Register(db.NewInitCmd())
+	a.Register(db.NewMigrateCmd())
 
 	// register server commands
-	a.Register(&server.Start{})
+	a.Register(server.NewStartCmd())
 
 	// register default commands
-	a.Register(&cmd.Help{})
-	a.Register(&cmd.Version{})
+	a.Register(cmd.NewHelpCmd())
+	a.Register(cmd.NewVersionCmd())
 
 	// start the app
 	a.Run()

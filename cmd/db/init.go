@@ -3,16 +3,17 @@ package db
 import "github.com/akaahmedkamal/go-cli/v1"
 
 // Init command to initialize the database.
-type Init struct{}
-
-// Name returns the command name.
-func (i *Init) Name() string {
-	return "db/init"
+type Init struct {
+	Name string `cli:"name"`
+	Help string `cli:"help"`
 }
 
-// Desc returns the command description.
-func (i *Init) Desc() string {
-	return "initialize database"
+// NewInitCmd initialized a new db/init command.
+func NewInitCmd() *Init {
+	return &Init{
+		Name: "db/init",
+		Help: "initialize database",
+	}
 }
 
 // Run executes the command's logic.
