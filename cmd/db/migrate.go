@@ -12,7 +12,7 @@ type Migrate struct {
 func NewMigrateCmd() *Migrate {
 	return &Migrate{
 		Name: "db/migrate",
-		Help: "migrate database",
+		Help: "Migrate database",
 	}
 }
 

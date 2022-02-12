@@ -31,7 +31,7 @@ type Start struct {
 func NewStartCmd() *Start {
 	return &Start{
 		Name: "server/start",
-		Help: "start Http server",
+		Help: "Start Http server",
 	}
 }
 

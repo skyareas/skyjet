@@ -19,7 +19,7 @@ func main() {
 	a.Register(server.NewStartCmd())
 
 	// register default commands
-	a.Register(cmd.NewHelpCmd())
+	a.RegisterDefaultHelp()
 	a.Register(cmd.NewVersionCmd())
 
 	// start the app

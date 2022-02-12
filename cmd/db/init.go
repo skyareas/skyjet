@@ -12,7 +12,7 @@ type Init struct {
 func NewInitCmd() *Init {
 	return &Init{
 		Name: "db/init",
-		Help: "initialize database",
+		Help: "Initialize database",
 	}
 }
 
