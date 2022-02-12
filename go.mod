@@ -3,7 +3,7 @@ module github.com/akaahmedkamal/go-server
 go 1.17
 
 require (
-	github.com/akaahmedkamal/go-cli v0.9.0
+	github.com/akaahmedkamal/go-cli v0.11.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/sqlite v1.2.6
 	gorm.io/gorm v1.22.5
