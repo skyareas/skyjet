@@ -30,3 +30,8 @@ func (r *HttpRequest) ParamString(name string) (string, bool) {
 	}
 	return p[len(p)-1], ok
 }
+
+// ReadBody reads the raw request body into the Body struct property.
+func (r *HttpRequest) ReadBody() error {
+	return r.Body.Read(r.Request.Body)
+}
