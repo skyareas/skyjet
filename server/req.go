@@ -8,11 +8,12 @@ import (
 type HttpRequest struct {
 	Request *http.Request
 	Body    *HttpRequestBody
+	User    HttpRequestUser
 	params  map[string][]string
 }
 
 func NewHttpRequest(req *http.Request, params map[string][]string) *HttpRequest {
-	return &HttpRequest{req, &HttpRequestBody{}, params}
+	return &HttpRequest{Request: req, Body: &HttpRequestBody{}, User: nil, params: params}
 }
 
 // Param returns all values for a specific path parameter.
