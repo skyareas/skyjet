@@ -15,25 +15,29 @@ var shared *Config
 // a new shared instance and returns it.
 func Shared() *Config {
 	if shared == nil {
-		shared = new(Config)
+		shared = &Config{}
 
-		file, err := readConfigFile()
+		cfg, err := readConfigFile()
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			app.Shared().Log().Fatalf("failed to read config file: %s", err.Error())
 		}
 
-		shared.Http = &HttpConfig{
-			Host:         httpHost(file),
-			Port:         httpPort(file),
-			ReadTimeout:  httpReadTimeout(file),
-			WriteTimeout: httpWriteTimeout(file),
-			IdleTimeout:  httpIdleTimeout(file),
-			ViewsPath:    httpViewsPath(file),
+		shared.Http = HttpConfig{
+			Host:         httpHost(cfg),
+			Port:         httpPort(cfg),
+			ReadTimeout:  httpReadTimeout(cfg),
+			WriteTimeout: httpWriteTimeout(cfg),
+			IdleTimeout:  httpIdleTimeout(cfg),
+			ViewsPath:    httpViewsPath(cfg),
+			Session: HttpSessionConfig{
+				CookieName: httpSessionName(cfg),
+				Secret:     httpSessionSecret(cfg),
+			},
 		}
 
-		shared.Db = &DbConfig{
-			Driver: dbDriver(file),
-			Url:    dbUrl(file),
+		shared.Db = DbConfig{
+			Driver: dbDriver(cfg),
+			Url:    dbUrl(cfg),
 		}
 	}
 

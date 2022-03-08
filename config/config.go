@@ -12,12 +12,9 @@ import (
 
 // Config struct represents the app's configurations.
 type Config struct {
-	Http *HttpConfig `yaml:"Http"`
-	Db   *DbConfig   `yaml:"DB" json:"DB"`
+	Http HttpConfig `yaml:"Http"`
+	Db   DbConfig   `yaml:"DB"`
 }
-
-// CfgFile generic type represents the content of a config file.
-type CfgFile map[interface{}]interface{}
 
 // configFilePath returns full path to the config file.
 // first, it looks at the cmd-line args, if not found,
@@ -32,14 +29,14 @@ func configFilePath() string {
 
 // readConfigFile reads and parses the content of config file,
 // and returns the result as a generic map type, see CfgFile.
-func readConfigFile() (CfgFile, error) {
+func readConfigFile() (*Config, error) {
+	cfg := Config{}
 	d, err := os.ReadFile(configFilePath())
 	if err != nil {
-		return nil, err
+		return &cfg, err
 	}
-	raw := make(CfgFile)
-	err = yaml.Unmarshal(d, raw)
-	return raw, err
+	err = yaml.Unmarshal(d, &cfg)
+	return &cfg, err
 }
 
 // mustConvToInt is a helper function to convert string to int,
@@ -57,7 +54,7 @@ func mustConvToInt(str string) int {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value.
-func dbDriver(cfgFile CfgFile) string {
+func dbDriver(cfg *Config) string {
 	args := app.Shared().Args()
 
 	driver, found := args.LookupString("--db-driver")
@@ -65,10 +62,8 @@ func dbDriver(cfgFile CfgFile) string {
 		return driver
 	}
 
-	if db, ok := cfgFile["DB"].(CfgFile); ok {
-		if driver, ok = db["Driver"].(string); ok {
-			return driver
-		}
+	if cfg.Db.Driver != "" {
+		return cfg.Db.Driver
 	}
 
 	return DefaultDbDriver
@@ -79,7 +74,7 @@ func dbDriver(cfgFile CfgFile) string {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value.
-func dbUrl(cfgFile CfgFile) string {
+func dbUrl(cfg *Config) string {
 	args := app.Shared().Args()
 
 	url, found := args.LookupString("--db-url")
@@ -87,10 +82,8 @@ func dbUrl(cfgFile CfgFile) string {
 		return url
 	}
 
-	if db, ok := cfgFile["DB"].(CfgFile); ok {
-		if url, ok = db["Url"].(string); ok {
-			return url
-		}
+	if cfg.Db.Url != "" {
+		return cfg.Db.Url
 	}
 
 	return DefaultDbUrl
@@ -101,7 +94,7 @@ func dbUrl(cfgFile CfgFile) string {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value.
-func httpHost(cfgFile CfgFile) string {
+func httpHost(cfg *Config) string {
 	args := app.Shared().Args()
 
 	host, found := args.LookupString("--http-host")
@@ -109,10 +102,8 @@ func httpHost(cfgFile CfgFile) string {
 		return host
 	}
 
-	if http, ok := cfgFile["Http"].(CfgFile); ok {
-		if host, ok = http["Host"].(string); ok {
-			return host
-		}
+	if cfg.Http.Host != "" {
+		return cfg.Http.Host
 	}
 
 	return DefaultHttpHost
@@ -123,7 +114,7 @@ func httpHost(cfgFile CfgFile) string {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value.
-func httpPort(cfgFile CfgFile) int {
+func httpPort(cfg *Config) int {
 	args := app.Shared().Args()
 
 	port, found := args.LookupString("--http-port")
@@ -131,10 +122,8 @@ func httpPort(cfgFile CfgFile) int {
 		return mustConvToInt(port)
 	}
 
-	if http, ok := cfgFile["Http"].(CfgFile); ok {
-		if port, ok := http["Port"].(int); ok {
-			return port
-		}
+	if cfg.Http.Port != 0 {
+		return cfg.Http.Port
 	}
 
 	return DefaultHttpPort
@@ -145,7 +134,7 @@ func httpPort(cfgFile CfgFile) int {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value, see DefaultHttpReadTimeout.
-func httpReadTimeout(cfgFile CfgFile) time.Duration {
+func httpReadTimeout(cfg *Config) time.Duration {
 	args := app.Shared().Args()
 
 	t, found := args.LookupString("--http-read-time")
@@ -153,10 +142,8 @@ func httpReadTimeout(cfgFile CfgFile) time.Duration {
 		return time.Duration(mustConvToInt(t)) * time.Second
 	}
 
-	if http, ok := cfgFile["Http"].(CfgFile); ok {
-		if t, ok := http["ReadTimeout"].(int); ok {
-			return time.Duration(t) * time.Second
-		}
+	if cfg.Http.ReadTimeout != 0 {
+		return cfg.Http.ReadTimeout * time.Second
 	}
 
 	return DefaultHttpReadTimeout
@@ -167,7 +154,7 @@ func httpReadTimeout(cfgFile CfgFile) time.Duration {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value, see DefaultHttpWriteTimeout.
-func httpWriteTimeout(cfgFile CfgFile) time.Duration {
+func httpWriteTimeout(cfg *Config) time.Duration {
 	args := app.Shared().Args()
 
 	t, found := args.LookupString("--http-write-time")
@@ -175,10 +162,8 @@ func httpWriteTimeout(cfgFile CfgFile) time.Duration {
 		return time.Duration(mustConvToInt(t)) * time.Second
 	}
 
-	if http, ok := cfgFile["Http"].(CfgFile); ok {
-		if t, ok := http["WriteTimeout"].(int); ok {
-			return time.Duration(t) * time.Second
-		}
+	if cfg.Http.WriteTimeout != 0 {
+		return cfg.Http.WriteTimeout * time.Second
 	}
 
 	return DefaultHttpWriteTimeout
@@ -189,7 +174,7 @@ func httpWriteTimeout(cfgFile CfgFile) time.Duration {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value, see DefaultHttpIdleTimeout.
-func httpIdleTimeout(cfgFile CfgFile) time.Duration {
+func httpIdleTimeout(cfg *Config) time.Duration {
 	args := app.Shared().Args()
 
 	t, found := args.LookupString("--http-idle-time")
@@ -197,10 +182,8 @@ func httpIdleTimeout(cfgFile CfgFile) time.Duration {
 		return time.Duration(mustConvToInt(t)) * time.Second
 	}
 
-	if http, ok := cfgFile["Http"].(CfgFile); ok {
-		if t, ok := http["IdleTimeout"].(int); ok {
-			return time.Duration(t) * time.Second
-		}
+	if cfg.Http.IdleTimeout != 0 {
+		return cfg.Http.IdleTimeout * time.Second
 	}
 
 	return DefaultHttpIdleTimeout
@@ -211,7 +194,7 @@ func httpIdleTimeout(cfgFile CfgFile) time.Duration {
 // - 1st looks at the cmd-line args.
 // - 2nd looks at the config file.
 // - 3rd returns the default hard-coded value, see DefaultHttpViewsPath.
-func httpViewsPath(cfgFile CfgFile) string {
+func httpViewsPath(cfg *Config) string {
 	args := app.Shared().Args()
 
 	vp, found := args.LookupString("--http-views-path")
@@ -219,13 +202,51 @@ func httpViewsPath(cfgFile CfgFile) string {
 		return resolve(vp)
 	}
 
-	if http, ok := cfgFile["Http"].(CfgFile); ok {
-		if vp, ok = http["ViewsPath"].(string); ok {
-			return resolve(vp)
-		}
+	if cfg.Http.ViewsPath != "" {
+		return resolve(cfg.Http.ViewsPath)
 	}
 
 	return resolve(DefaultHttpViewsPath)
+}
+
+// httpSessionName returns http session name, it looks up
+// the session name in the following order.
+// - 1st looks at the cmd-line args.
+// - 2nd looks at the config file.
+// - 3rd returns the default hard-coded value.
+func httpSessionName(cfg *Config) string {
+	args := app.Shared().Args()
+
+	name, found := args.LookupString("--http-session-name")
+	if found {
+		return name
+	}
+
+	if cfg.Http.Session.CookieName != "" {
+		return cfg.Http.Session.CookieName
+	}
+
+	return DefaultHttpSessionName
+}
+
+// httpSessionSecret returns http session secret, it looks up
+// the session secret in the following order.
+// - 1st looks at the cmd-line args.
+// - 2nd looks at the config file.
+// - 3rd returns the default hard-coded value.
+func httpSessionSecret(cfg *Config) string {
+	args := app.Shared().Args()
+
+	secret, found := args.LookupString("--http-session-secret")
+	if found {
+		return secret
+	}
+
+	if cfg.Http.Session.Secret != "" {
+		return cfg.Http.Session.Secret
+	}
+
+	return DefaultHttpSessionSecret
 }
 
 // resolve returns an absolute path from given path.

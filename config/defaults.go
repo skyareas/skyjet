@@ -3,17 +3,19 @@ package config
 import "time"
 
 const (
-	DefaultConfigFilePath = "cfg.yml"
+	DefaultConfigFilePath = "config.yml"
 )
 
 // Http Defaults
 const (
-	DefaultHttpHost         = "127.0.0.1"
-	DefaultHttpPort         = 5000
-	DefaultHttpReadTimeout  = 5 * time.Second
-	DefaultHttpWriteTimeout = 10 * time.Second
-	DefaultHttpIdleTimeout  = 15 * time.Second
-	DefaultHttpViewsPath    = "views"
+	DefaultHttpHost          = "0.0.0.0"
+	DefaultHttpPort          = 5000
+	DefaultHttpReadTimeout   = 5 * time.Second
+	DefaultHttpWriteTimeout  = 10 * time.Second
+	DefaultHttpIdleTimeout   = 15 * time.Second
+	DefaultHttpViewsPath     = "views"
+	DefaultHttpSessionName   = "session"
+	DefaultHttpSessionSecret = "abc@123#xyz"
 )
 
 // Db Defaults
