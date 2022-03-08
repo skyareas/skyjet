@@ -140,3 +140,8 @@ func (ref *HttpResponse) SendStatus(statusCode int) error {
 func (ref *HttpResponse) Sent() bool {
 	return ref.sent
 }
+
+// SetCookie a wrapper around the http.SetCookie() function.
+func (ref *HttpResponse) SetCookie(cookie *http.Cookie) {
+	http.SetCookie(ref.w, cookie)
+}

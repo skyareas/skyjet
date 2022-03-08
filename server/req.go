@@ -8,6 +8,7 @@ import (
 type HttpRequest struct {
 	Request *http.Request
 	Body    *HttpRequestBody
+	User    HttpRequestUser
 	Session *HttpRequestSession
 	params  map[string][]string
 }
@@ -15,10 +16,11 @@ type HttpRequest struct {
 func NewHttpRequest(req *http.Request, params map[string][]string) (*HttpRequest, error) {
 	ses, err := NewSession(req)
 	return &HttpRequest{
-		req,
-		&HttpRequestBody{},
-		ses,
-		params,
+		Request: req,
+		Body: &HttpRequestBody{},
+		User: nil,
+		Session: ses,
+		params: params,
 	}, err
 }
 
@@ -36,4 +38,9 @@ func (r *HttpRequest) ParamString(name string) (string, bool) {
 		return "", false
 	}
 	return p[len(p)-1], ok
+}
+
+// ReadBody reads the raw request body into the Body struct property.
+func (r *HttpRequest) ReadBody() error {
+	return r.Body.Read(r.Request.Body)
 }

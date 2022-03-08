@@ -23,7 +23,7 @@ type CfgFile map[interface{}]interface{}
 // first, it looks at the cmd-line args, if not found,
 // it returns the default config file path.
 func configFilePath() string {
-	p, exists := app.Shared().Args().GetString("--cfg", "--config")
+	p, exists := app.Shared().Args().LookupString("--cfg", "--config")
 	if exists {
 		return resolve(p)
 	}
@@ -60,7 +60,7 @@ func mustConvToInt(str string) int {
 func dbDriver(cfgFile CfgFile) string {
 	args := app.Shared().Args()
 
-	driver, found := args.GetString("--db-driver")
+	driver, found := args.LookupString("--db-driver")
 	if found {
 		return driver
 	}
@@ -82,7 +82,7 @@ func dbDriver(cfgFile CfgFile) string {
 func dbUrl(cfgFile CfgFile) string {
 	args := app.Shared().Args()
 
-	url, found := args.GetString("--db-url")
+	url, found := args.LookupString("--db-url")
 	if found {
 		return url
 	}
@@ -104,7 +104,7 @@ func dbUrl(cfgFile CfgFile) string {
 func httpHost(cfgFile CfgFile) string {
 	args := app.Shared().Args()
 
-	host, found := args.GetString("--http-host")
+	host, found := args.LookupString("--http-host")
 	if found {
 		return host
 	}
@@ -126,7 +126,7 @@ func httpHost(cfgFile CfgFile) string {
 func httpPort(cfgFile CfgFile) int {
 	args := app.Shared().Args()
 
-	port, found := args.GetString("--http-port")
+	port, found := args.LookupString("--http-port")
 	if found {
 		return mustConvToInt(port)
 	}
@@ -148,7 +148,7 @@ func httpPort(cfgFile CfgFile) int {
 func httpReadTimeout(cfgFile CfgFile) time.Duration {
 	args := app.Shared().Args()
 
-	t, found := args.GetString("--http-read-time")
+	t, found := args.LookupString("--http-read-time")
 	if found {
 		return time.Duration(mustConvToInt(t)) * time.Second
 	}
@@ -170,7 +170,7 @@ func httpReadTimeout(cfgFile CfgFile) time.Duration {
 func httpWriteTimeout(cfgFile CfgFile) time.Duration {
 	args := app.Shared().Args()
 
-	t, found := args.GetString("--http-write-time")
+	t, found := args.LookupString("--http-write-time")
 	if found {
 		return time.Duration(mustConvToInt(t)) * time.Second
 	}
@@ -192,7 +192,7 @@ func httpWriteTimeout(cfgFile CfgFile) time.Duration {
 func httpIdleTimeout(cfgFile CfgFile) time.Duration {
 	args := app.Shared().Args()
 
-	t, found := args.GetString("--http-idle-time")
+	t, found := args.LookupString("--http-idle-time")
 	if found {
 		return time.Duration(mustConvToInt(t)) * time.Second
 	}
@@ -214,7 +214,7 @@ func httpIdleTimeout(cfgFile CfgFile) time.Duration {
 func httpViewsPath(cfgFile CfgFile) string {
 	args := app.Shared().Args()
 
-	vp, found := args.GetString("--http-views-path")
+	vp, found := args.LookupString("--http-views-path")
 	if found {
 		return resolve(vp)
 	}
