@@ -7,7 +7,6 @@ import (
 )
 
 type Router struct {
-	config *RouterConfig
 	routes []*RouteEntry
 }
 
@@ -18,21 +17,18 @@ const (
 	PathMatchingStrategyPrefix PathMatchingStrategy = 1
 )
 
-type RouterConfig struct {
+func NewRouter() *Router {
+	return &Router{routes: make([]*RouteEntry, 0)}
 }
 
-func NewRouter(cfg *RouterConfig) *Router {
-	return &Router{config: cfg, routes: make([]*RouteEntry, 0)}
-}
-
-func (ref *Router) append(pattern, method string, route Route, pathMatchingStrategy PathMatchingStrategy) {
+func (r *Router) append(pattern, method string, route Route, pathMatchingStrategy PathMatchingStrategy) {
 	if pattern == "" {
 		app.Shared().Log().Fatalln("server: invalid pattern")
 	}
 	if route == nil {
 		app.Shared().Log().Fatalln("server: nil route")
 	}
-	ref.routes = append(ref.routes, &RouteEntry{
+	r.routes = append(r.routes, &RouteEntry{
 		pattern:              pattern,
 		method:               method,
 		route:                route,
@@ -40,56 +36,60 @@ func (ref *Router) append(pattern, method string, route Route, pathMatchingStrat
 	})
 }
 
-func (ref *Router) Get(pattern string, route Route) {
-	ref.append(pattern, http.MethodGet, route, PathMatchingStrategyExact)
+func (r *Router) Get(pattern string, route Route) {
+	r.append(pattern, http.MethodGet, route, PathMatchingStrategyExact)
 }
 
-func (ref *Router) Post(pattern string, route Route) {
-	ref.append(pattern, http.MethodPost, route, PathMatchingStrategyExact)
+func (r *Router) Post(pattern string, route Route) {
+	r.append(pattern, http.MethodPost, route, PathMatchingStrategyExact)
 }
 
-func (ref *Router) Put(pattern string, route Route) {
-	ref.append(pattern, http.MethodPut, route, PathMatchingStrategyExact)
+func (r *Router) Put(pattern string, route Route) {
+	r.append(pattern, http.MethodPut, route, PathMatchingStrategyExact)
 }
 
-func (ref *Router) Delete(pattern string, route Route) {
-	ref.append(pattern, http.MethodDelete, route, PathMatchingStrategyExact)
+func (r *Router) Delete(pattern string, route Route) {
+	r.append(pattern, http.MethodDelete, route, PathMatchingStrategyExact)
 }
 
-func (ref *Router) All(pattern string, route Route) {
-	ref.append(pattern, "*", route, PathMatchingStrategyExact)
+func (r *Router) All(pattern string, route Route) {
+	r.append(pattern, "*", route, PathMatchingStrategyExact)
 }
 
-func (ref *Router) Use(pattern string, routes ...Route) {
+func (r *Router) Use(pattern string, routes ...Route) {
 	for _, route := range routes {
-		ref.append(pattern, "*", route, PathMatchingStrategyPrefix)
+		r.append(pattern, "*", route, PathMatchingStrategyPrefix)
 	}
 }
 
-func (ref *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var recovered bool
 
 	defer func() {
 		if rec := recover(); rec != nil {
 			recovered = true
 			w.WriteHeader(http.StatusInternalServerError)
-			ref.writeError(w, rec.(error).Error())
+			r.writeError(w, rec.(error).Error())
 		}
 	}()
 
 	var found bool
 
-	_req := NewHttpRequest(req, map[string][]string{})
+	_req, err := NewHttpRequest(req, map[string][]string{})
+	if err != nil {
+		panic(err)
+	}
+
 	_res := NewHttpResponse(req, w)
 
-	for _, entry := range ref.routes {
+	for _, entry := range r.routes {
 		match, params := entry.Match(req)
 		if match {
 			found = true
 
 			_req.params = params
 
-			if err := entry.route.HandleRequest(_req, _res); err != nil {
+			if err = entry.route.HandleRequest(_req, _res); err != nil {
 				panic(err)
 			}
 
@@ -101,11 +101,11 @@ func (ref *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if !found && !recovered {
 		w.WriteHeader(http.StatusNotFound)
-		ref.writeError(w, "404 page not found")
+		r.writeError(w, "404 page not found")
 	}
 }
 
-func (ref *Router) writeError(w http.ResponseWriter, errMsg string) {
+func (r *Router) writeError(w http.ResponseWriter, errMsg string) {
 	if _, err := w.Write([]byte(errMsg)); err != nil {
 		panic(err)
 	}

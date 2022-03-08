@@ -5,6 +5,9 @@ Http:
   WriteTimeout: 10
   IdleTimeout: 15
   ViewsPath: views
+  Session:
+    CookieName: session
+    Secret: xyz@123
 
 DB:
   Driver: sqlite3

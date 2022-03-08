@@ -25,7 +25,7 @@ func NewHttpServer(router ...*Router) *HttpServer {
 	if len(router) > 0 {
 		srv.router = router[0]
 	} else {
-		srv.router = NewRouter(&RouterConfig{})
+		srv.router = NewRouter()
 	}
 
 	cfg := config.Shared()

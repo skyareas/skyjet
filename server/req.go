@@ -8,11 +8,18 @@ import (
 type HttpRequest struct {
 	Request *http.Request
 	Body    *HttpRequestBody
+	Session *HttpRequestSession
 	params  map[string][]string
 }
 
-func NewHttpRequest(req *http.Request, params map[string][]string) *HttpRequest {
-	return &HttpRequest{req, &HttpRequestBody{}, params}
+func NewHttpRequest(req *http.Request, params map[string][]string) (*HttpRequest, error) {
+	ses, err := NewSession(req)
+	return &HttpRequest{
+		req,
+		&HttpRequestBody{},
+		ses,
+		params,
+	}, err
 }
 
 // Param returns all values for a specific path parameter.

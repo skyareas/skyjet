@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/akaahmedkamal/go-cli v0.11.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/sqlite v1.2.6
 	gorm.io/gorm v1.22.5

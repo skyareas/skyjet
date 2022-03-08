@@ -10,4 +10,10 @@ type HttpConfig struct {
 	ReadTimeout  time.Duration `yaml:"ReadTimeout"`
 	WriteTimeout time.Duration `yaml:"WriteTimeout"`
 	IdleTimeout  time.Duration `yaml:"IdleTimeout"`
+	Session      HttpSessionConfig
+}
+
+type HttpSessionConfig struct {
+	CookieName string
+	Secret     string
 }
