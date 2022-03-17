@@ -46,8 +46,8 @@ func (s *HttpServer) Router() *Router {
 // ListenAndServe start listening at the address specified,
 // and handles incoming requests.
 func (s *HttpServer) ListenAndServe() {
-	err := s.srv.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
+	app.log.Printf("starting http server at %s", s.srv.Addr)
+	if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		panic(err.Error())
 	}
 }
@@ -56,5 +56,11 @@ func (s *HttpServer) ListenAndServe() {
 // and finalize all live requests if any.
 func (s *HttpServer) Shutdown(ctx context.Context) error {
 	s.srv.SetKeepAlivesEnabled(false)
-	return s.srv.Shutdown(ctx)
+	err := s.srv.Shutdown(ctx)
+	if err != nil {
+		app.log.Printf("http server stopped with error: %s", err.Error())
+	} else {
+		app.log.Println("http server stopped successfully")
+	}
+	return err
 }

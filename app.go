@@ -17,7 +17,7 @@ var app *App
 
 func SharedApp() *App {
 	if app == nil {
-		app = &App{*cli.NewApp(), *NewRouter(), nil, nil, logrus.New()}
+		app = &App{*cli.NewApp(), *NewRouter(), nil, nil, NewJsonLogger()}
 		app.cfg, _ = loadConfigFile(defaultConfigFilePath, true)
 		app.srv = NewHttpServer(&app.Router)
 		app.Register(NewStartCmd())

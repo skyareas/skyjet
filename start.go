@@ -44,14 +44,8 @@ func (s *Start) Run(_ *cli.App) {
 	<-s.stop
 
 	if db != nil {
-		err := db.Disconnect()
-		if err != nil {
-			app.log.Fatalln(err)
-		}
-		app.log.Println("database connection closed")
+		_ = db.Disconnect()
 	}
-
-	app.log.Println("server stopped")
 }
 
 // shutdown gracefully shuts down the Http server.

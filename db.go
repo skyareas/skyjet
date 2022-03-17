@@ -53,5 +53,11 @@ func (c *DbClient) Disconnect() error {
 	if err != nil {
 		return err
 	}
-	return d.Close()
+	err = d.Close()
+	if err != nil {
+		app.log.Printf("database connection closed with error: %s", err.Error())
+	} else {
+		app.log.Println("database connection closed successfully")
+	}
+	return err
 }
