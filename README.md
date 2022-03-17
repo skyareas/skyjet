@@ -1,12 +1,1 @@
-# go-server
-
-Golang Server Template
-
-## TODOs
-
-- [x] Handle errors in `Router.ServeHTTP()`.
-- [ ] Enhance the `RouteEntry.Match()` function.
-- [ ] Implement `HttpResponse.Jsonp()`.
-- [ ] Implement `HttpResponse.Download()`.
-- [ ] Add tests.
-- [ ] Add header management functions to the `HttpResponse`.
+# SkyJet [![Build Status](https://github.com/skyareas/skyjet/workflows/Release/badge.svg)](https://github.com/skyareas/skyjet/actions?query=workflow%3ARelease) [![Go Reference](https://pkg.go.dev/badge/github.com/skyareas/skyjet.svg)](https://pkg.go.dev/github.com/skyareas/skyjet)
