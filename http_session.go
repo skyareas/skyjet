@@ -59,7 +59,19 @@ func (s *HttpRequestSession) String() (string, error) {
 		claims[k] = v
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(app.cfg.Http.Session.Secret)
+	return token.SignedString([]byte(app.cfg.Http.Session.Secret))
+}
+
+func (s *HttpRequestSession) Cookie() (*http.Cookie, error) {
+	str, err := s.String()
+	if err != nil {
+		return nil, err
+	}
+	return &http.Cookie{
+		Name:  app.cfg.Http.Session.CookieName,
+		Value: str,
+		Path:  "/",
+	}, nil
 }
 
 func (s *HttpRequestSession) Get(name string) string {

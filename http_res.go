@@ -13,14 +13,15 @@ import (
 
 // HttpResponse struct represents an Http response.
 type HttpResponse struct {
-	r      *http.Request
-	w      http.ResponseWriter
-	Header http.Header
-	sent   bool
+	r       *http.Request
+	w       http.ResponseWriter
+	Header  http.Header
+	session *HttpRequestSession
+	sent    bool
 }
 
-func NewHttpResponse(req *http.Request, w http.ResponseWriter) *HttpResponse {
-	return &HttpResponse{r: req, w: w, Header: w.Header(), sent: false}
+func NewHttpResponse(req *http.Request, w http.ResponseWriter, session *HttpRequestSession) *HttpResponse {
+	return &HttpResponse{r: req, w: w, Header: w.Header(), session: session, sent: false}
 }
 
 // Writer returns a pointer to the underlying http.ResponseWriter
@@ -44,11 +45,6 @@ func (r *HttpResponse) Json(v interface{}, statusCode ...int) error {
 	}
 	r.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return r.Send(b, statusCode...)
-}
-
-// Jsonp sends a JSON response with JSONP support.
-func (r *HttpResponse) Jsonp(d interface{}) error {
-	return nil
 }
 
 // Redirect redirects a request, optionally specifying the status code.
@@ -95,11 +91,17 @@ func (r *HttpResponse) Render(temp string, data ...interface{}) error {
 		d = data[0]
 	}
 
-	r.w.Header().Set("Content-Type", "text/html")
-	err = t.Execute(r.w, d)
-	r.End()
+	if err = r.setSession(); err != nil {
+		return err
+	}
 
-	return err
+	r.w.Header().Set("Content-Type", "text/html")
+	if err = t.Execute(r.w, d); err != nil {
+		return err
+	}
+
+	r.End()
+	return nil
 }
 
 // Send sends a response of raw bytes value,
@@ -108,9 +110,17 @@ func (r *HttpResponse) Send(v []byte, statusCode ...int) error {
 	if len(statusCode) > 0 {
 		r.Status(statusCode[0])
 	}
-	_, err := r.w.Write(v)
+
+	if err := r.setSession(); err != nil {
+		return err
+	}
+
+	if _, err := r.w.Write(v); err != nil {
+		return err
+	}
+
 	r.End()
-	return err
+	return nil
 }
 
 // SendFile sends a file as an octet stream,
@@ -143,10 +153,7 @@ func (r *HttpResponse) Status(statusCode int) {
 // SendStatus set the response status code and send its
 // string representation as the response body.
 func (r *HttpResponse) SendStatus(statusCode int) error {
-	r.Status(statusCode)
-	_, err := r.w.Write([]byte(http.StatusText(statusCode)))
-	r.End()
-	return err
+	return r.Send([]byte(http.StatusText(statusCode)), statusCode)
 }
 
 // Sent returns a bool indicates whether the response
@@ -158,4 +165,13 @@ func (r *HttpResponse) Sent() bool {
 // SetCookie a wrapper around the http.SetCookie() function.
 func (r *HttpResponse) SetCookie(cookie *http.Cookie) {
 	http.SetCookie(r.w, cookie)
+}
+
+func (r *HttpResponse) setSession() error {
+	ses, err := r.session.Cookie()
+	if err != nil {
+		return err
+	}
+	r.SetCookie(ses)
+	return nil
 }

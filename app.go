@@ -26,6 +26,10 @@ func SharedApp() *App {
 	return app
 }
 
+func UseApp() *App {
+	return SharedApp()
+}
+
 func (a *App) Config() *Config {
 	return a.cfg
 }
@@ -34,4 +38,8 @@ func (a *App) LoadConfigFile(path string) error {
 	var err error
 	a.cfg, err = loadConfigFile(path)
 	return err
+}
+
+func (a *App) Log() *logrus.Logger {
+	return a.log
 }

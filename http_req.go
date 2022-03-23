@@ -14,13 +14,13 @@ type HttpRequest struct {
 	params  map[string]string
 }
 
-func NewHttpRequest(req *http.Request, params map[string]string) *HttpRequest {
+func NewHttpRequest(req *http.Request, session *HttpRequestSession) *HttpRequest {
 	return &HttpRequest{
 		Request: req,
 		Body:    &HttpRequestBody{},
 		User:    nil,
-		Session: NewSession(req),
-		params:  params,
+		Session: session,
+		params:  make(map[string]string),
 	}
 }
 

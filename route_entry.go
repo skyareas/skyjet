@@ -5,11 +5,18 @@ import (
 	"strings"
 )
 
+type RouteMatchingStrategy int
+
+const (
+	RouteMatchingStrategyExact  RouteMatchingStrategy = 0
+	RouteMatchingStrategyPrefix RouteMatchingStrategy = 1
+)
+
 type RouteEntry struct {
-	pattern              string
-	method               string
-	route                Route
-	pathMatchingStrategy PathMatchingStrategy
+	pattern  string
+	method   string
+	handler  RouteHandler
+	matching RouteMatchingStrategy
 }
 
 func (ref *RouteEntry) Match(req *http.Request) (bool, map[string]string) {
@@ -21,22 +28,22 @@ func (ref *RouteEntry) Match(req *http.Request) (bool, map[string]string) {
 	}
 
 	// match wildcard
-	if (ref.pattern == "*" && ref.method == "*") ||
-		(ref.pattern == req.URL.Path && ref.method == "*") ||
+	if (ref.pattern == "*" && ref.method == HttpMethodAll) ||
+		(ref.pattern == req.URL.Path && ref.method == HttpMethodAll) ||
 		(ref.pattern == "*" && ref.method == req.Method) {
 		return true, params
 	}
 
 	// match prefix
-	if ref.pathMatchingStrategy == PathMatchingStrategyPrefix &&
+	if ref.matching == RouteMatchingStrategyPrefix &&
 		strings.HasPrefix(req.URL.Path, ref.pattern) &&
-		(ref.method == "*" || ref.method == req.Method) {
+		(ref.method == HttpMethodAll || ref.method == req.Method) {
 		return true, params
 	}
 
 	// match with params
 	if strings.ContainsRune(ref.pattern, ':') {
-		if ref.method == "*" || ref.method == req.Method {
+		if ref.method == HttpMethodAll || ref.method == req.Method {
 			return ref.matchWithParams(req.URL.Path)
 		}
 	}

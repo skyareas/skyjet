@@ -14,6 +14,11 @@ func NewJsonLogger() *logrus.Logger {
 		Hooks:        make(logrus.LevelHooks),
 		Level:        logrus.InfoLevel,
 		ExitFunc:     os.Exit,
-		ReportCaller: true,
+		ReportCaller: false,
 	}
+}
+
+// Log is a public accessor to the SharedApp().Log()
+func Log() *logrus.Logger {
+	return SharedApp().Log()
 }

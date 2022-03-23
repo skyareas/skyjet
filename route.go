@@ -1,5 +1,3 @@
 package skyjet
 
-type Route interface {
-	HandleRequest(*HttpRequest, *HttpResponse) error
-}
+type RouteHandler = func(req *HttpRequest, res *HttpResponse) error
