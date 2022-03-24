@@ -53,8 +53,7 @@ func (r *Router) UseMiddleware(pattern string, handlers ...RouteHandler) {
 
 func (r *Router) Use(pattern string, router *Router) {
 	for _, route := range router.routes {
-		route.pattern = strings.ReplaceAll(pattern+route.pattern, "//", "/")
-		r.routes = append(r.routes, route)
+		r.append(pattern+route.pattern, route.method, route.handler, route.matching)
 	}
 }
 
@@ -62,7 +61,14 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, httpRequest *http.Request) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			r.writeError(w, rec.(error).Error())
+			switch v := rec.(type) {
+			case string:
+				r.writeError(w, v)
+			case error:
+				r.writeError(w, v.Error())
+			default:
+				app.Log().Fatalf("unable to recover from error: %v", v)
+			}
 		}
 	}()
 
@@ -97,7 +103,7 @@ func (r *Router) append(pattern, method string, handler RouteHandler, matching .
 	}
 
 	r.routes = append(r.routes, RouteEntry{
-		pattern:  pattern,
+		pattern:  r.cleanPattern(pattern),
 		method:   method,
 		handler:  handler,
 		matching: m,
@@ -126,4 +132,12 @@ func (r *Router) writeError(w http.ResponseWriter, errMsg string) {
 	if _, err := w.Write([]byte(errMsg)); err != nil {
 		app.log.Fatalln(err)
 	}
+}
+
+func (r *Router) cleanPattern(pattern string) string {
+	p := strings.ReplaceAll(pattern, "//", "/")
+	if len(p) > 1 && p[len(p)-1] == '/' {
+		return p[:len(p)-1]
+	}
+	return p
 }
