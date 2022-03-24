@@ -24,33 +24,33 @@ const (
 
 // Config struct represents the app's configurations.
 type Config struct {
-	Http         HttpConfig
-	Db           DbConfig
-	CustomConfig map[string]interface{}
+	Http         HttpConfig             `json:"http"`
+	Db           DbConfig               `json:"db"`
+	CustomConfig map[string]interface{} `json:"custom_config"`
 }
 
 // HttpConfig struct represents the http-server config values.
 type HttpConfig struct {
-	Host         string
-	Port         int
-	ViewsPath    string
-	ContentRoot  string
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-	IdleTimeout  time.Duration
-	Session      HttpSessionConfig
+	Host         string            `json:"host"`
+	Port         int               `json:"port"`
+	ViewsPath    string            `json:"views_path"`
+	ContentRoot  string            `json:"content_root"`
+	ReadTimeout  time.Duration     `json:"read_timeout"`
+	WriteTimeout time.Duration     `json:"write_timeout"`
+	IdleTimeout  time.Duration     `json:"idle_timeout"`
+	Session      HttpSessionConfig `json:"session"`
 }
 
 // HttpSessionConfig struct represents the http-session config values.
 type HttpSessionConfig struct {
-	CookieName string
-	Secret     string
+	CookieName string `json:"cookie_name"`
+	Secret     string `json:"secret"`
 }
 
 // DbConfig struct represents the database config values.
 type DbConfig struct {
-	Driver string
-	Url    string
+	Driver string `json:"driver"`
+	Url    string `json:"url"`
 }
 
 // loadConfigFile reads and parses the content of config file.
