@@ -19,32 +19,32 @@ type RouteEntry struct {
 	matching RouteMatchingStrategy
 }
 
-func (ref *RouteEntry) Match(req *http.Request) (bool, map[string]string) {
+func (r *RouteEntry) Match(req *http.Request) (bool, map[string]string) {
 	params := make(map[string]string)
 
 	// match exactly
-	if ref.pattern == req.URL.Path && ref.method == req.Method {
+	if r.pattern == req.URL.Path && r.method == req.Method {
 		return true, params
 	}
 
 	// match wildcard
-	if (ref.pattern == "*" && ref.method == HttpMethodAll) ||
-		(ref.pattern == req.URL.Path && ref.method == HttpMethodAll) ||
-		(ref.pattern == "*" && ref.method == req.Method) {
+	if (r.pattern == "*" && r.method == HttpMethodAll) ||
+		(r.pattern == req.URL.Path && r.method == HttpMethodAll) ||
+		(r.pattern == "*" && r.method == req.Method) {
 		return true, params
 	}
 
 	// match prefix
-	if ref.matching == RouteMatchingStrategyPrefix &&
-		strings.HasPrefix(req.URL.Path, ref.pattern) &&
-		(ref.method == HttpMethodAll || ref.method == req.Method) {
+	if ((r.matching == RouteMatchingStrategyPrefix && strings.HasPrefix(req.URL.Path, r.pattern)) ||
+		(strings.HasSuffix(r.pattern, "*") && strings.HasPrefix(req.URL.Path, strings.TrimSuffix(r.pattern, "*")))) &&
+		(r.method == HttpMethodAll || r.method == req.Method) {
 		return true, params
 	}
 
 	// match with params
-	if strings.ContainsRune(ref.pattern, ':') {
-		if ref.method == HttpMethodAll || ref.method == req.Method {
-			return ref.matchWithParams(req.URL.Path)
+	if strings.ContainsRune(r.pattern, ':') {
+		if r.method == HttpMethodAll || r.method == req.Method {
+			return r.matchWithParams(req.URL.Path)
 		}
 	}
 
@@ -52,8 +52,8 @@ func (ref *RouteEntry) Match(req *http.Request) (bool, map[string]string) {
 	return false, params
 }
 
-func (ref *RouteEntry) matchWithParams(path string) (bool, map[string]string) {
-	patternParts := strings.Split(ref.pattern, "/")
+func (r *RouteEntry) matchWithParams(path string) (bool, map[string]string) {
+	patternParts := strings.Split(r.pattern, "/")
 	pathParts := strings.Split(path, "/")
 	params := make(map[string]string)
 

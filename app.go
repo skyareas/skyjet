@@ -26,10 +26,6 @@ func SharedApp() *App {
 	return app
 }
 
-func UseApp() *App {
-	return SharedApp()
-}
-
 func (a *App) Config() *Config {
 	return a.cfg
 }

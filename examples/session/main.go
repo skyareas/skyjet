@@ -9,7 +9,7 @@ import (
 func main() {
 	app := skyjet.SharedApp()
 	app.Use("/auth", routes.NewAuthRouter())
-	app.UseMiddleware("/", middleware.AuthMiddleware)
+	app.Middleware("/", middleware.AuthMiddleware)
 	app.Use("/", routes.NewHomeRouter())
 	app.Run()
 }
