@@ -45,7 +45,7 @@ func (r *Router) All(pattern string, handlers ...RouteHandler) {
 	}
 }
 
-func (r *Router) UseMiddleware(pattern string, handlers ...RouteHandler) {
+func (r *Router) Middleware(pattern string, handlers ...RouteHandler) {
 	for _, handler := range handlers {
 		r.append(pattern, HttpMethodAll, handler, RouteMatchingStrategyPrefix)
 	}

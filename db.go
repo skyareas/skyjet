@@ -1,3 +1,6 @@
+//go:build gorm
+// +build gorm
+
 package skyjet
 
 import (
