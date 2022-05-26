@@ -26,24 +26,24 @@ const (
 type Config struct {
 	Http         HttpConfig             `json:"http"`
 	Db           DbConfig               `json:"db"`
-	CustomConfig map[string]interface{} `json:"custom_config"`
+	CustomConfig map[string]interface{} `json:"customConfig"`
 }
 
 // HttpConfig struct represents the http-server config values.
 type HttpConfig struct {
 	Host         string            `json:"host"`
 	Port         int               `json:"port"`
-	ViewsPath    string            `json:"views_path"`
-	ContentRoot  string            `json:"content_root"`
-	ReadTimeout  time.Duration     `json:"read_timeout"`
-	WriteTimeout time.Duration     `json:"write_timeout"`
-	IdleTimeout  time.Duration     `json:"idle_timeout"`
+	ViewsPath    string            `json:"viewsPath"`
+	ContentRoot  string            `json:"contentRoot"`
+	ReadTimeout  time.Duration     `json:"readTimeout"`
+	WriteTimeout time.Duration     `json:"writeTimeout"`
+	IdleTimeout  time.Duration     `json:"idleTimeout"`
 	Session      HttpSessionConfig `json:"session"`
 }
 
 // HttpSessionConfig struct represents the http-session config values.
 type HttpSessionConfig struct {
-	CookieName string `json:"cookie_name"`
+	CookieName string `json:"cookieName"`
 	Secret     string `json:"secret"`
 }
 
