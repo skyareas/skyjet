@@ -18,7 +18,7 @@ func NewJsonLogger() *logrus.Logger {
 	}
 }
 
-// Log is a public accessor to the SharedApp().Log()
+// Log is a public accessor to the App().Log()
 func Log() *logrus.Logger {
-	return SharedApp().Log()
+	return app.Log()
 }

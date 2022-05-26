@@ -5,7 +5,7 @@ import (
 	"github.com/skyareas/go-cli"
 )
 
-type App struct {
+type Application struct {
 	cli.App
 	Router
 	cfg *Config
@@ -13,11 +13,11 @@ type App struct {
 	log *logrus.Logger
 }
 
-var app *App
+var app *Application
 
-func SharedApp() *App {
+func App() *Application {
 	if app == nil {
-		app = &App{*cli.NewApp(), *NewRouter(), nil, nil, NewJsonLogger()}
+		app = &Application{*cli.NewApp(), *NewRouter(), nil, nil, NewJsonLogger()}
 		app.cfg, _ = loadConfigFile(defaultConfigFilePath, true)
 		app.srv = NewHttpServer(&app.Router)
 		app.Register(NewStartCmd())
@@ -26,16 +26,16 @@ func SharedApp() *App {
 	return app
 }
 
-func (a *App) Config() *Config {
+func (a *Application) Config() *Config {
 	return a.cfg
 }
 
-func (a *App) LoadConfigFile(path string) error {
+func (a *Application) LoadConfigFile(path string) error {
 	var err error
 	a.cfg, err = loadConfigFile(path)
 	return err
 }
 
-func (a *App) Log() *logrus.Logger {
+func (a *Application) Log() *logrus.Logger {
 	return a.log
 }

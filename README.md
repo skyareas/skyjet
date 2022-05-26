@@ -40,7 +40,7 @@ package main
 import "github.com/skyareas/skyjet"
 
 func main() {
-    app := skyjet.SharedApp()
+    app := skyjet.App()
     app.Get("/", func(req *skyjet.HttpRequest, res *skyjet.HttpResponse) error {
         return res.Send([]byte("Hello, Skyjet!"))
     })
@@ -60,7 +60,7 @@ A detailed documentation is not ready at the moment but the work is in progress!
 import "github.com/skyareas/skyjet"
 
 func main() {
-    app := skyjet.SharedApp()
+    app := skyjet.App()
     app.Get("/path", getHandler)
     app.Post("/path", postHandler)
     app.Put("/path", putHandler)
@@ -78,7 +78,7 @@ func main() {
 import "github.com/skyareas/skyjet"
 
 func main() {
-    app := skyjet.SharedApp()
+    app := skyjet.App()
 	
     auth := skyjet.NewRouter()
     auth.Post("/login", loginHandler)

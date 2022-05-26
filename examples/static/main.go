@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	app := skyjet.SharedApp()
+	app := skyjet.App()
 	app.Use("/assets", skyjet.Static())
 	app.Get("/", func(req *skyjet.HttpRequest, res *skyjet.HttpResponse) error {
 		return res.SendFile("views/index.html")

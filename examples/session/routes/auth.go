@@ -24,7 +24,7 @@ func postLogin(req *skyjet.HttpRequest, res *skyjet.HttpResponse) error {
 	if err != nil {
 		return err
 	}
-	skyjet.SharedApp().Log().Printf("%v\n", req.Request.Form)
+	skyjet.App().Log().Printf("%v\n", req.Request.Form)
 	req.Session.Set("username", req.Request.Form.Get("username"))
 	res.Redirect("/")
 	return nil
